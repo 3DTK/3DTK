@@ -44,8 +44,8 @@ extern int rayX,rayY;
 extern float  rayVP[4];
 
 #define NUMDIM  3
-#define RIGHT 0
-#define LEFT  1
+#define RIGHT_V 0
+#define LEFT_V  1
 #define MIDDLE  2
 
 extern float minB[NUMDIM], maxB[NUMDIM];    /*box */
@@ -73,11 +73,11 @@ template <class T> bool HitBoundingBox(const T center[3], T size )
   //  rays cast all from the eye(assume perspective view)
   for (i=0; i<NUMDIM; i++)
     if(origin[i] < minB[i]) {
-      quadrant[i] = LEFT;
+      quadrant[i] = LEFT_V;
       candidatePlane[i] = minB[i];
       inside = false;
     }else if (origin[i] > maxB[i]) {
-      quadrant[i] = RIGHT;
+      quadrant[i] = RIGHT_V;
       candidatePlane[i] = maxB[i];
       inside = false;
     }else {

@@ -498,6 +498,11 @@ set(FIXED_WORD_LENGTH 48 CACHE STRING "Word length for fixed-point type")
 set(FIXED_INT_WORD_LENGTH 36 CACHE STRING "Integer word length for fixed-point type")
 set(FIXED_HERON_ITERATIONS 3 CACHE STRING "Iterations ins heron algorithm for square root calculations for fixed point numbers")
 
+set(FIXED_SMALL_WORD_LENGTH 48 CACHE STRING "Word length for small fixed-point type")
+set(FIXED_SMALL_INT_WORD_LENGTH 10 CACHE STRING "Integer word length for smallfixed-point type")
+
+
+
 if(WITH_SYSTEMC)
   message(STATUS "SystemC support enabled")
   find_package(SystemC REQUIRED)
@@ -510,6 +515,8 @@ if(WITH_SYSTEMC)
     target_compile_definitions(icpFixpoint PRIVATE
       FIXED_WORD_LENGTH=${FIXED_WORD_LENGTH}
       FIXED_INT_WORD_LENGTH=${FIXED_INT_WORD_LENGTH}
+      FIXED_SMALL_WORD_LENGTH=${FIXED_SMALL_WORD_LENGTH}
+      FIXED_SMALL_INT_WORD_LENGTH=${FIXED_SMALL_INT_WORD_LENGTH}
       FIXED_HERON_ITERATIONS=${FIXED_HERON_ITERATIONS}
     )
     set(SYSTEMC_LINK_LIBS ${SYSTEMC_LIBRARY})

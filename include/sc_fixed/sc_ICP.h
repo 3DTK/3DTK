@@ -35,7 +35,7 @@ public:
    */
   virtual ~sc_ICP() {};
 
-  virtual int match(std::vector<std::array<fixed_val, 3>>& source, std::vector<std::array<fixed_val, 3>>& target, std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf, std::ofstream& frame);
+  virtual int match(std::vector<std::array<fixed_val, 3>>& source, std::vector<std::array<fixed_val, 3>>& target, std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf, std::ofstream& frame);
 
   inline fixed_val get_max_dist_match2();
   inline void set_max_dist_match2(fixed_val max_dist_match2);
@@ -63,7 +63,7 @@ protected:
    * epsilon for stopping ICP algorithm ( convergence criterium )
    */
   int epsilonICPexp;
-  fixed_val epsilonICP;
+  fixed_small_val epsilonICP;
 
   /**
    * ptr to ICP error function minimizer functor

@@ -25,9 +25,9 @@ public:
    */
   virtual ~sc_ICPapx() {};
 
-  fixed_val Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
+  fixed_small_val Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
              const std::vector<std::array<fixed_val, 3>>& matchedTarget,
-             fixed_val *alignxf,
+             fixed_small_val *alignxf,
              const std::array<fixed_val, 3> centerSource,
              const std::array<fixed_val, 3> centerTarget) override;
 

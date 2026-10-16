@@ -32,9 +32,9 @@ std::vector<std::array<fixed_val, 3>> array2fixedArray(const DataXYZ &input) {
   return result;
 }
 
-// converts transMat and dalignxf (as double[16]) to fixed_val transMat and dalignxf (as std::array<fixed_val, 16>)
-std::array<fixed_val, 16> array2fixedArray16(const double input[16]) {
-  std::array<fixed_val, 16> result;
+// converts transMat and dalignxf (as double[16]) to fixed_small_val transMat and dalignxf (as std::array<fixed_small_val, 16>)
+std::array<fixed_small_val, 16> array2fixedArray16(const double input[16]) {
+  std::array<fixed_small_val, 16> result;
   for (unsigned int i = 0; i < 16; ++i) {
     result[i] = input[i];
   }
@@ -51,7 +51,7 @@ void printPoints(const std::vector<std::array<fixed_val, 3>>& points) {
 }
 
 // writes a transformation matrix to a .frame-file
-void writeFrame(std::ofstream& frame, std::array<fixed_val, 16>& matrix, int viewFactor) {
+void writeFrame(std::ofstream& frame, std::array<fixed_small_val, 16>& matrix, int viewFactor) {
   for(unsigned int i = 0; i < matrix.size(); i++) {
       frame << static_cast<double>(matrix[i]);
       frame << " ";

@@ -35,7 +35,7 @@ using std::cerr;
  */
 sc_ICP::sc_ICP(sc_ICPminimizer* my_sc_ICPminimizer, fixed_val max_dist_match, int max_num_iterations, bool quiet, int epsilonICPexp) {
   this->my_sc_ICPminimizer = my_sc_ICPminimizer;
-  this->epsilonICP = fixed_val(std::pow(10.0, -epsilonICPexp));
+  this->epsilonICP = fixed_small_val(std::pow(10.0, -epsilonICPexp));
 
   if (!quiet) {
     cout << endl <<  "ICP fixed-point algorithm will proceed with the following parameters: " << endl
@@ -73,8 +73,8 @@ sc_ICP::sc_ICP(sc_ICPminimizer* my_sc_ICPminimizer, fixed_val max_dist_match, in
  * @param dalignxf virtuell angewendete delta-Transformation
  * @param frame Stream, auf den die Transformationen in die .frames-Datei des target-Scans geschrieben werden
  */
-int sc_ICP::match(std::vector<std::array<fixed_val, 3>>& source, std::vector<std::array<fixed_val, 3>>& target, std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf, std::ofstream& frame) {
-  fixed_val id[16];
+int sc_ICP::match(std::vector<std::array<fixed_val, 3>>& source, std::vector<std::array<fixed_val, 3>>& target, std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf, std::ofstream& frame) {
+  fixed_small_val id[16];
   M4identity(id);
 
   transform(target, id, transMat, dalignxf, frame, 0);
@@ -84,8 +84,8 @@ int sc_ICP::match(std::vector<std::array<fixed_val, 3>>& source, std::vector<std
     return 0;
   }
 
-  fixed_val alignxf[16];
-  fixed_val ret = 0.0, prev_ret = 0.0, prev_prev_ret = 0.0;
+  fixed_small_val alignxf[16];
+  fixed_small_val ret = 0.0, prev_ret = 0.0, prev_prev_ret = 0.0;
   int iter = 0;
 
   // ICP main loop

@@ -16,22 +16,56 @@
 #define FIXED_INT_WORD_LENGTH 36
 #endif
 
+// Additional datatype for small, precise values
+#ifndef FIXED_SMALL_WORD_LENGTH
+#define FIXED_SMALL_WORD_LENGTH 48
+#endif
+
+#ifndef FIXED_SMALL_INT_WORD_LENGTH
+#define FIXED_SMALL_INT_WORD_LENGTH 10
+#endif
+
 #ifndef FIXED_HERON_ITERATIONS
 #define FIXED_HERON_ITERATIONS 3
 #endif
 
 using namespace sc_dt;
 using fixed_val = sc_fixed<FIXED_WORD_LENGTH, FIXED_INT_WORD_LENGTH>;
+using fixed_small_val = sc_fixed<FIXED_SMALL_WORD_LENGTH, FIXED_SMALL_INT_WORD_LENGTH>;
 
-fixed_val sc_fixed_heron_sqrt(fixed_val s);
+// function to calculate the square root via heron method
+template <typename T>
+
+T sc_fixed_heron_sqrt(T s) {
+
+  if (s == 0) {
+    return 0;
+  }
+  if (s < 0) {
+    std::cerr << "warning: square root from negative numbers not allowed --> will return 0" << std::endl;
+    return 0;
+  }
+
+  T x = s / 2 + 1;
+  T x_n;
+
+  for(int i = FIXED_HERON_ITERATIONS; i > 0; i--) {
+    x_n = (x + s / x) / 2;
+    x = x_n;
+  }
+
+  return x_n;
+
+}
+
 bool sc_choldc(fixed_val A[3][3], fixed_val diag[3]);
-void sc_cholsl(fixed_val A[3][3], fixed_val diag[3], fixed_val B[3], fixed_val x[3]);
+void sc_cholsl(fixed_val A[3][3], fixed_val diag[3], fixed_val B[3], fixed_small_val x[3]);
 
-void transform(std::vector<std::array<fixed_val, 3>>& scan, fixed_val alignxf[16], std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf, std::ofstream& frame, int islum);
-void transformPoints(const fixed_val alignxf[16], std::vector<std::array<fixed_val, 3>>& scan);
-void transformMatrix(const fixed_val alignxf[16], std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf);
-void transform3(const fixed_val alignxf[16], std::array<fixed_val, 3>& point);
-void MMult(const fixed_val M1[16], const std::array<fixed_val, 16>& M2, std::array<fixed_val, 16>& Mout);
-fixed_val sc_abs(fixed_val);
+void transform(std::vector<std::array<fixed_val, 3>>& scan, fixed_small_val alignxf[16], std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf, std::ofstream& frame, int islum);
+void transformPoints(const fixed_small_val alignxf[16], std::vector<std::array<fixed_val, 3>>& scan);
+void transformMatrix(const fixed_small_val alignxf[16], std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf);
+void transform3(const fixed_small_val alignxf[16], std::array<fixed_val, 3>& point);
+void MMult(const fixed_small_val M1[16], const std::array<fixed_small_val, 16>& M2, std::array<fixed_small_val, 16>& Mout);
+fixed_small_val sc_abs(fixed_small_val);
 
 #endif // SC_FIXED_MATH_H

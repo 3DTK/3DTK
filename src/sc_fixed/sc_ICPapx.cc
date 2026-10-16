@@ -31,9 +31,9 @@
  * @param alignxf: resulting transformation matrix
  * @return Error estimation of the matching (rms)
  */
-fixed_val sc_ICPapx::Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
+fixed_small_val sc_ICPapx::Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
                       const std::vector<std::array<fixed_val, 3>>& matchedTarget,
-                      fixed_val *alignxf,
+                      fixed_small_val *alignxf,
                       const std::array<fixed_val, 3> centerSource,
                       const std::array<fixed_val, 3> centerTarget){
   int n = matchedSource.size();
@@ -75,7 +75,7 @@ fixed_val sc_ICPapx::Align(const std::vector<std::array<fixed_val, 3>>& matchedS
     A[2][2] += ((p2c[0])*(p2c[0]) + (p2c[1])*(p2c[1]));
   }
 
-  fixed_val error = sc_fixed_heron_sqrt(sum / n);
+  fixed_small_val error = sc_fixed_heron_sqrt<fixed_small_val>(sum / n);
 
   fixed_val diag[3];
 
@@ -84,16 +84,16 @@ fixed_val sc_ICPapx::Align(const std::vector<std::array<fixed_val, 3>>& matchedS
     return -1.0;
   }
 
-  fixed_val x[3];
+  fixed_small_val x[3];
   sc_cholsl(A, diag, B, x);
 
   // Interpret results
-  fixed_val sx = x[0];
-  fixed_val cx = sc_fixed_heron_sqrt(1.0 - sx*sx);
-  fixed_val sy = x[1];
-  fixed_val cy = sc_fixed_heron_sqrt(1.0 - sy*sy);
-  fixed_val sz = x[2];
-  fixed_val cz = sc_fixed_heron_sqrt(1.0 - sz*sz);
+  fixed_small_val sx = x[0];
+  fixed_small_val cx = sc_fixed_heron_sqrt<fixed_small_val>(1.0 - sx*sx);
+  fixed_small_val sy = x[1];
+  fixed_small_val cy = sc_fixed_heron_sqrt<fixed_small_val>(1.0 - sy*sy);
+  fixed_small_val sz = x[2];
+  fixed_small_val cz = sc_fixed_heron_sqrt<fixed_small_val>(1.0 - sz*sz);
 
   alignxf[0]  = cy*cz;
   alignxf[1]  = sx*sy*cz + cx*sz;

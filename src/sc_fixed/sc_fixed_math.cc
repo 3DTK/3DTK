@@ -16,28 +16,7 @@
 #include "sc_fixed/sc_fixed_math.h"
 #include "sc_fixed/sc_fixed_converter.h"
 
-// function to calculate the square root via heron method
-fixed_val sc_fixed_heron_sqrt(fixed_val s) {
 
-  if (s == 0) {
-    return 0;
-  }
-  if (s < 0) {
-    std::cerr << "warning: square root from negative numbers not allowed --> will return 0" << std::endl;
-    return 0;
-  }
-
-  fixed_val x = s / 2 + 1;
-  fixed_val x_n;
-
-  for(int i = FIXED_HERON_ITERATIONS; i > 0; i--) {
-    x_n = (x + s / x) / 2;
-    x = x_n;
-  }
-
-  return x_n;
-
-}
 
 // function to compute cholesky decomposition
 bool sc_choldc(fixed_val A[3][3], fixed_val diag[3]) {
@@ -55,7 +34,7 @@ bool sc_choldc(fixed_val A[3][3], fixed_val diag[3]) {
         if (sum < epsilon) {
           return false;
         }
-        diag[i] = sc_fixed_heron_sqrt(sum);
+        diag[i] = sc_fixed_heron_sqrt<fixed_val>(sum);
       }
       else {
         A[j][i] = sum / diag[i];
@@ -66,7 +45,7 @@ bool sc_choldc(fixed_val A[3][3], fixed_val diag[3]) {
 }
 
 // function to solve cholesky
-void sc_cholsl(fixed_val A[3][3], fixed_val diag[3], fixed_val B[3], fixed_val x[3]) {
+void sc_cholsl(fixed_val A[3][3], fixed_val diag[3], fixed_val B[3], fixed_small_val x[3]) {
   int N = 3;
   for (int i = 0; i < N; i++) {
     fixed_val sum = B[i];
@@ -85,7 +64,7 @@ void sc_cholsl(fixed_val A[3][3], fixed_val diag[3], fixed_val B[3], fixed_val x
 }
 
 // transform method without any algorithm type, because ICP algorithm is only with APX and Brute Force
-void transform(std::vector<std::array<fixed_val, 3>>& scan, fixed_val alignxf[16], std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf, std::ofstream& frame, int islum){
+void transform(std::vector<std::array<fixed_val, 3>>& scan, fixed_small_val alignxf[16], std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf, std::ofstream& frame, int islum){
 
   // transform points
   transformPoints(alignxf, scan);
@@ -100,14 +79,14 @@ void transform(std::vector<std::array<fixed_val, 3>>& scan, fixed_val alignxf[16
 }
 
 // Internal function of transform which alters the points
-void transformPoints(const fixed_val alignxf[16], std::vector<std::array<fixed_val, 3>>& scan){
+void transformPoints(const fixed_small_val alignxf[16], std::vector<std::array<fixed_val, 3>>& scan){
   for (size_t i = 0; i < scan.size(); ++i) {
     transform3(alignxf, scan[i]);
   }
 }
 
 // Internal function of transformPoints which alters a point
-void transform3(const fixed_val alignxf[16], std::array<fixed_val, 3>& point){
+void transform3(const fixed_small_val alignxf[16], std::array<fixed_val, 3>& point){
   fixed_val x_neu, y_neu, z_neu;
   x_neu = point[0] * alignxf[0] + point[1] * alignxf[4] + point[2] * alignxf[8];
   y_neu = point[0] * alignxf[1] + point[1] * alignxf[5] + point[2] * alignxf[9];
@@ -118,8 +97,8 @@ void transform3(const fixed_val alignxf[16], std::array<fixed_val, 3>& point){
 }
 
 // Internal function of transform which handles the matrices
-void transformMatrix(const fixed_val alignxf[16], std::array<fixed_val, 16>& transMat, std::array<fixed_val, 16>& dalignxf){
-  std::array<fixed_val, 16> tempxf;
+void transformMatrix(const fixed_small_val alignxf[16], std::array<fixed_small_val, 16>& transMat, std::array<fixed_small_val, 16>& dalignxf){
+  std::array<fixed_small_val, 16> tempxf;
 
   // apply alignxf to transMat and update pose vectors, copy to transMat
   MMult(alignxf, transMat, tempxf);
@@ -131,7 +110,7 @@ void transformMatrix(const fixed_val alignxf[16], std::array<fixed_val, 16>& tra
 }
 
 // Matrixmultiplikation von M1 und M2, Ergebnis wird in Mout gespeichert
-void MMult(const fixed_val M1[16], const std::array<fixed_val, 16>& M2, std::array<fixed_val, 16>& Mout){
+void MMult(const fixed_small_val M1[16], const std::array<fixed_small_val, 16>& M2, std::array<fixed_small_val, 16>& Mout){
   Mout[ 0] = M1[ 0]*M2[ 0]+M1[ 4]*M2[ 1]+M1[ 8]*M2[ 2]+M1[12]*M2[ 3];
   Mout[ 1] = M1[ 1]*M2[ 0]+M1[ 5]*M2[ 1]+M1[ 9]*M2[ 2]+M1[13]*M2[ 3];
   Mout[ 2] = M1[ 2]*M2[ 0]+M1[ 6]*M2[ 1]+M1[10]*M2[ 2]+M1[14]*M2[ 3];
@@ -151,6 +130,6 @@ void MMult(const fixed_val M1[16], const std::array<fixed_val, 16>& M2, std::arr
 }
 
 // Absolutbetrag einer fixed-point Zahl
-fixed_val sc_abs(fixed_val x) {
-  return (x < fixed_val(0)) ? fixed_val(-x) : x;
+fixed_small_val sc_abs(fixed_small_val x) {
+  return (x < fixed_small_val(0)) ? fixed_small_val(-x) : x;
 }

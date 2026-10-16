@@ -46,9 +46,9 @@ public:
   // Understanding (CVIU), Elsevier Science, Volume 114, Issue 8,
   // pp. 963-980, August 2010.
 
-  virtual fixed_val Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
+  virtual fixed_small_val Align(const std::vector<std::array<fixed_val, 3>>& matchedSource,
                      const std::vector<std::array<fixed_val, 3>>& matchedTarget,
-                     fixed_val *alignxf,
+                     fixed_small_val *alignxf,
                      const std::array<fixed_val, 3> centerSource,
                      const std::array<fixed_val, 3> centerTarget) = 0;
 

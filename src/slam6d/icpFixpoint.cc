@@ -165,8 +165,8 @@ int sc_main(int argc, char **argv)
   std::cout << Scan::allScans.size() << " scans detected" << std::endl;
 
   // lege die transMat's und dalignxf's für alle Scans an
-  std::vector<std::array<fixed_val, 16>> transMats;
-  std::vector<std::array<fixed_val, 16>> dalignxfs;
+  std::vector<std::array<fixed_small_val, 16>> transMats;
+  std::vector<std::array<fixed_small_val, 16>> dalignxfs;
   transMats.reserve(Scan::allScans.size());
   dalignxfs.reserve(Scan::allScans.size());
 
